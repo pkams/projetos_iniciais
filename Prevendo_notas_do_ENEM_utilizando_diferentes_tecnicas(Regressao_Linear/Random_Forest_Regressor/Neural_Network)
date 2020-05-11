@@ -1,0 +1,1434 @@
+{
+  "nbformat": 4,
+  "nbformat_minor": 0,
+  "metadata": {
+    "colab": {
+      "name": "Untitled2.ipynb",
+      "provenance": [],
+      "collapsed_sections": [],
+      "authorship_tag": "ABX9TyPixRFgveTiRNAFCAdpZpjm",
+      "include_colab_link": true
+    },
+    "kernelspec": {
+      "name": "python3",
+      "display_name": "Python 3"
+    },
+    "accelerator": "GPU"
+  },
+  "cells": [
+    {
+      "cell_type": "markdown",
+      "metadata": {
+        "id": "view-in-github",
+        "colab_type": "text"
+      },
+      "source": [
+        "<a href=\"https://colab.research.google.com/github/pkams/projetos_iniciais/blob/master/Prevendo_notas_do_ENEM_utilizando_diferentes_tecnicas(Regressao_Linear/Random_Forest_Regressor/Neural_Network)\" target=\"_parent\"><img src=\"https://colab.research.google.com/assets/colab-badge.svg\" alt=\"Open In Colab\"/></a>"
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "uX3Mw_mbJ3-j",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "# Importando bibliotecas básicas\n",
+        "\n",
+        "import pandas as pd\n",
+        "import numpy as np"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "PTRg5v10J5V7",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "# O objetivo deste dataset é prever as notas de matemática do ENEM baseando-se nas outras features.\n",
+        "\n",
+        "df = pd.read_csv('https://raw.githubusercontent.com/wesleykaoru/Codenation/master/Data_Science/datasets/train.csv')"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "zDLJ3WjAJ8eD",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 261
+        },
+        "outputId": "baf72e61-0b22-4b75-9e6c-d2cc487ced5f"
+      },
+      "source": [
+        "df.head()"
+      ],
+      "execution_count": 162,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/html": [
+              "<div>\n",
+              "<style scoped>\n",
+              "    .dataframe tbody tr th:only-of-type {\n",
+              "        vertical-align: middle;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe tbody tr th {\n",
+              "        vertical-align: top;\n",
+              "    }\n",
+              "\n",
+              "    .dataframe thead th {\n",
+              "        text-align: right;\n",
+              "    }\n",
+              "</style>\n",
+              "<table border=\"1\" class=\"dataframe\">\n",
+              "  <thead>\n",
+              "    <tr style=\"text-align: right;\">\n",
+              "      <th></th>\n",
+              "      <th>Unnamed: 0</th>\n",
+              "      <th>NU_INSCRICAO</th>\n",
+              "      <th>NU_ANO</th>\n",
+              "      <th>CO_MUNICIPIO_RESIDENCIA</th>\n",
+              "      <th>NO_MUNICIPIO_RESIDENCIA</th>\n",
+              "      <th>CO_UF_RESIDENCIA</th>\n",
+              "      <th>SG_UF_RESIDENCIA</th>\n",
+              "      <th>NU_IDADE</th>\n",
+              "      <th>TP_SEXO</th>\n",
+              "      <th>TP_ESTADO_CIVIL</th>\n",
+              "      <th>TP_COR_RACA</th>\n",
+              "      <th>TP_NACIONALIDADE</th>\n",
+              "      <th>CO_MUNICIPIO_NASCIMENTO</th>\n",
+              "      <th>NO_MUNICIPIO_NASCIMENTO</th>\n",
+              "      <th>CO_UF_NASCIMENTO</th>\n",
+              "      <th>SG_UF_NASCIMENTO</th>\n",
+              "      <th>TP_ST_CONCLUSAO</th>\n",
+              "      <th>TP_ANO_CONCLUIU</th>\n",
+              "      <th>TP_ESCOLA</th>\n",
+              "      <th>TP_ENSINO</th>\n",
+              "      <th>IN_TREINEIRO</th>\n",
+              "      <th>CO_ESCOLA</th>\n",
+              "      <th>CO_MUNICIPIO_ESC</th>\n",
+              "      <th>NO_MUNICIPIO_ESC</th>\n",
+              "      <th>CO_UF_ESC</th>\n",
+              "      <th>SG_UF_ESC</th>\n",
+              "      <th>TP_DEPENDENCIA_ADM_ESC</th>\n",
+              "      <th>TP_LOCALIZACAO_ESC</th>\n",
+              "      <th>TP_SIT_FUNC_ESC</th>\n",
+              "      <th>IN_BAIXA_VISAO</th>\n",
+              "      <th>IN_CEGUEIRA</th>\n",
+              "      <th>IN_SURDEZ</th>\n",
+              "      <th>IN_DEFICIENCIA_AUDITIVA</th>\n",
+              "      <th>IN_SURDO_CEGUEIRA</th>\n",
+              "      <th>IN_DEFICIENCIA_FISICA</th>\n",
+              "      <th>IN_DEFICIENCIA_MENTAL</th>\n",
+              "      <th>IN_DEFICIT_ATENCAO</th>\n",
+              "      <th>IN_DISLEXIA</th>\n",
+              "      <th>IN_DISCALCULIA</th>\n",
+              "      <th>IN_AUTISMO</th>\n",
+              "      <th>...</th>\n",
+              "      <th>Q011</th>\n",
+              "      <th>Q012</th>\n",
+              "      <th>Q013</th>\n",
+              "      <th>Q014</th>\n",
+              "      <th>Q015</th>\n",
+              "      <th>Q016</th>\n",
+              "      <th>Q017</th>\n",
+              "      <th>Q018</th>\n",
+              "      <th>Q019</th>\n",
+              "      <th>Q020</th>\n",
+              "      <th>Q021</th>\n",
+              "      <th>Q022</th>\n",
+              "      <th>Q023</th>\n",
+              "      <th>Q024</th>\n",
+              "      <th>Q025</th>\n",
+              "      <th>Q026</th>\n",
+              "      <th>Q027</th>\n",
+              "      <th>Q028</th>\n",
+              "      <th>Q029</th>\n",
+              "      <th>Q030</th>\n",
+              "      <th>Q031</th>\n",
+              "      <th>Q032</th>\n",
+              "      <th>Q033</th>\n",
+              "      <th>Q034</th>\n",
+              "      <th>Q035</th>\n",
+              "      <th>Q036</th>\n",
+              "      <th>Q037</th>\n",
+              "      <th>Q038</th>\n",
+              "      <th>Q039</th>\n",
+              "      <th>Q040</th>\n",
+              "      <th>Q041</th>\n",
+              "      <th>Q042</th>\n",
+              "      <th>Q043</th>\n",
+              "      <th>Q044</th>\n",
+              "      <th>Q045</th>\n",
+              "      <th>Q046</th>\n",
+              "      <th>Q047</th>\n",
+              "      <th>Q048</th>\n",
+              "      <th>Q049</th>\n",
+              "      <th>Q050</th>\n",
+              "    </tr>\n",
+              "  </thead>\n",
+              "  <tbody>\n",
+              "    <tr>\n",
+              "      <th>0</th>\n",
+              "      <td>1</td>\n",
+              "      <td>ed50e8aaa58e7a806c337585efee9ca41f1eb1ad</td>\n",
+              "      <td>2016</td>\n",
+              "      <td>4314902</td>\n",
+              "      <td>Porto Alegre</td>\n",
+              "      <td>43</td>\n",
+              "      <td>RS</td>\n",
+              "      <td>24</td>\n",
+              "      <td>M</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>1</td>\n",
+              "      <td>1</td>\n",
+              "      <td>4314902.0</td>\n",
+              "      <td>Porto Alegre</td>\n",
+              "      <td>43.0</td>\n",
+              "      <td>RS</td>\n",
+              "      <td>1</td>\n",
+              "      <td>4</td>\n",
+              "      <td>1</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>0</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>...</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>C</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>C</td>\n",
+              "      <td>H</td>\n",
+              "      <td>E</td>\n",
+              "      <td>5.0</td>\n",
+              "      <td>5.0</td>\n",
+              "      <td>1.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5</td>\n",
+              "      <td>0</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5.0</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>D</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>1</th>\n",
+              "      <td>2</td>\n",
+              "      <td>2c3acac4b33ec2b195d77e7c04a2d75727fad723</td>\n",
+              "      <td>2016</td>\n",
+              "      <td>2304707</td>\n",
+              "      <td>Granja</td>\n",
+              "      <td>23</td>\n",
+              "      <td>CE</td>\n",
+              "      <td>17</td>\n",
+              "      <td>F</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>3</td>\n",
+              "      <td>1</td>\n",
+              "      <td>2304707.0</td>\n",
+              "      <td>Granja</td>\n",
+              "      <td>23.0</td>\n",
+              "      <td>CE</td>\n",
+              "      <td>2</td>\n",
+              "      <td>0</td>\n",
+              "      <td>2</td>\n",
+              "      <td>1.0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>23005157.0</td>\n",
+              "      <td>2304707.0</td>\n",
+              "      <td>Granja</td>\n",
+              "      <td>23.0</td>\n",
+              "      <td>CE</td>\n",
+              "      <td>2.0</td>\n",
+              "      <td>1.0</td>\n",
+              "      <td>1.0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>...</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5</td>\n",
+              "      <td>1</td>\n",
+              "      <td>1</td>\n",
+              "      <td>1</td>\n",
+              "      <td>1</td>\n",
+              "      <td>1</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>C</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>C</td>\n",
+              "      <td>A</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>2</th>\n",
+              "      <td>3</td>\n",
+              "      <td>f4545f8ccb9ff5c8aad7d32951b3f251a26e6568</td>\n",
+              "      <td>2016</td>\n",
+              "      <td>2304400</td>\n",
+              "      <td>Fortaleza</td>\n",
+              "      <td>23</td>\n",
+              "      <td>CE</td>\n",
+              "      <td>21</td>\n",
+              "      <td>F</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>3</td>\n",
+              "      <td>1</td>\n",
+              "      <td>2304400.0</td>\n",
+              "      <td>Fortaleza</td>\n",
+              "      <td>23.0</td>\n",
+              "      <td>CE</td>\n",
+              "      <td>3</td>\n",
+              "      <td>0</td>\n",
+              "      <td>1</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>0</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>...</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>C</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>A</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>3</th>\n",
+              "      <td>4</td>\n",
+              "      <td>3d6ec248fef899c414e77f82d5c6d2bffbeaf7fe</td>\n",
+              "      <td>2016</td>\n",
+              "      <td>3304557</td>\n",
+              "      <td>Rio de Janeiro</td>\n",
+              "      <td>33</td>\n",
+              "      <td>RJ</td>\n",
+              "      <td>25</td>\n",
+              "      <td>F</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>1</td>\n",
+              "      <td>3304557.0</td>\n",
+              "      <td>Rio de Janeiro</td>\n",
+              "      <td>33.0</td>\n",
+              "      <td>RJ</td>\n",
+              "      <td>1</td>\n",
+              "      <td>9</td>\n",
+              "      <td>1</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>0</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>...</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>B</td>\n",
+              "      <td>B</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>C</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>D</td>\n",
+              "      <td>B</td>\n",
+              "      <td>C</td>\n",
+              "      <td>B</td>\n",
+              "      <td>C</td>\n",
+              "      <td>F</td>\n",
+              "      <td>C</td>\n",
+              "      <td>2.0</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>5.0</td>\n",
+              "      <td>5.0</td>\n",
+              "      <td>5.0</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5</td>\n",
+              "      <td>2</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5.0</td>\n",
+              "      <td>C</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>D</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "    </tr>\n",
+              "    <tr>\n",
+              "      <th>4</th>\n",
+              "      <td>5</td>\n",
+              "      <td>bf896ac8d3ecadd6dba1dfbf50110afcbf5d3268</td>\n",
+              "      <td>2016</td>\n",
+              "      <td>1302603</td>\n",
+              "      <td>Manaus</td>\n",
+              "      <td>13</td>\n",
+              "      <td>AM</td>\n",
+              "      <td>28</td>\n",
+              "      <td>M</td>\n",
+              "      <td>0.0</td>\n",
+              "      <td>2</td>\n",
+              "      <td>1</td>\n",
+              "      <td>1505304.0</td>\n",
+              "      <td>Oriximiná</td>\n",
+              "      <td>15.0</td>\n",
+              "      <td>PA</td>\n",
+              "      <td>1</td>\n",
+              "      <td>4</td>\n",
+              "      <td>1</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>0</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>0</td>\n",
+              "      <td>...</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>B</td>\n",
+              "      <td>F</td>\n",
+              "      <td>D</td>\n",
+              "      <td>5.0</td>\n",
+              "      <td>4.0</td>\n",
+              "      <td>3.0</td>\n",
+              "      <td>5.0</td>\n",
+              "      <td>4.0</td>\n",
+              "      <td>5</td>\n",
+              "      <td>5</td>\n",
+              "      <td>4</td>\n",
+              "      <td>3</td>\n",
+              "      <td>1</td>\n",
+              "      <td>4</td>\n",
+              "      <td>5</td>\n",
+              "      <td>NaN</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "      <td>A</td>\n",
+              "    </tr>\n",
+              "  </tbody>\n",
+              "</table>\n",
+              "<p>5 rows × 167 columns</p>\n",
+              "</div>"
+            ],
+            "text/plain": [
+              "   Unnamed: 0                              NU_INSCRICAO  ...  Q049  Q050\n",
+              "0           1  ed50e8aaa58e7a806c337585efee9ca41f1eb1ad  ...     B     D\n",
+              "1           2  2c3acac4b33ec2b195d77e7c04a2d75727fad723  ...     C     A\n",
+              "2           3  f4545f8ccb9ff5c8aad7d32951b3f251a26e6568  ...     B     A\n",
+              "3           4  3d6ec248fef899c414e77f82d5c6d2bffbeaf7fe  ...     A     A\n",
+              "4           5  bf896ac8d3ecadd6dba1dfbf50110afcbf5d3268  ...     A     A\n",
+              "\n",
+              "[5 rows x 167 columns]"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 162
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "iLSeM6PAKw1e",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 84
+        },
+        "outputId": "a4ec6a3d-573a-4440-9dab-965776f6d492"
+      },
+      "source": [
+        "# Objetivo aqui é pegar as 10 váriaveis mais correlacionadas com váriavel de NU_NOTA_MT que é nosso alvo.\n",
+        "\n",
+        "colunas = df.corr().nlargest(11, 'NU_NOTA_MT')['NU_NOTA_MT'].keys()\n",
+        "colunas"
+      ],
+      "execution_count": 153,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "Index(['NU_NOTA_MT', 'NU_NOTA_CN', 'NU_NOTA_CH', 'NU_NOTA_LC',\n",
+              "       'NU_NOTA_REDACAO', 'TP_DEPENDENCIA_ADM_ESC', 'NU_NOTA_COMP3',\n",
+              "       'NU_NOTA_COMP5', 'NU_NOTA_COMP4', 'NU_NOTA_COMP2', 'NU_NOTA_COMP1'],\n",
+              "      dtype='object')"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 153
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "qFwc-_4iLBDD",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "# Tiramos a váriavel alvo da lista e ficamos com as restantes\n",
+        "\n",
+        "colunas = colunas[1:]"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "DjixOgNkLTN2",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "6fdc305c-3fe6-4be1-cf37-37a0e1968873"
+      },
+      "source": [
+        "df[colunas].shape"
+      ],
+      "execution_count": 8,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "(13730, 10)"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 8
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "tKeQiZcGLfkj",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "# Por observação das váriaveis temos provas com valores NaN, o que pode indicar que a pessoa faltou a prova. \n",
+        "# Supomos que alguém que faltou no dia (ou em ambos os dias) tirou nota baixa e/ou 0.\n",
+        "# Com essa suposição jogamos valores zerados para preencher os NaN's. \n",
+        "\n",
+        "# Salvamos o X e y\n",
+        "\n",
+        "X = df[colunas].fillna(0)\n",
+        "y = df['NU_NOTA_MT']\n",
+        "y = y.fillna(0)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "Sko2dR6bN5AC",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "c2af6b69-4e99-4c57-b46e-ee3218da64ab"
+      },
+      "source": [
+        "# Verificamos se tem algum NaN restante\n",
+        "\n",
+        "X.isna().sum().sum(), y.isna().sum().sum()"
+      ],
+      "execution_count": 157,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "(0, 0)"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 157
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "ecUWZhu0LnDc",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "# Dividimos em treino e teste\n",
+        "\n",
+        "from sklearn.model_selection import train_test_split\n",
+        "\n",
+        "X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "3POotRQVL8S2",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "# Importamos bibliotecas para testar diferentes hiperparametros\n",
+        "# Tedtaremos diferentes ordens de features com PolynomialFeatures\n",
+        "\n",
+        "from sklearn.preprocessing import PolynomialFeatures\n",
+        "from sklearn.model_selection import GridSearchCV\n",
+        "from sklearn.pipeline import Pipeline\n",
+        "from sklearn.preprocessing import StandardScaler\n",
+        "from sklearn.linear_model import LinearRegression"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "aMrGVRmBOv4G",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "# Aplicamos StandardScaler para normalizar\n",
+        "\n",
+        "scaler = StandardScaler()\n",
+        "\n",
+        "X_train = scaler.fit_transform(X_train)\n",
+        "X_test = scaler.transform(X_test)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "KbWxXSnUMrQd",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "# Criamos os steps e fazemos Pipeline, também criamos uma lista de paramos a ser testada com GridSearch\n",
+        "\n",
+        "steps = [('Poly',PolynomialFeatures()),('LinearRegression', LinearRegression())]\n",
+        "pipeline = Pipeline(steps)\n",
+        "params = {'Poly__degree':[1, 2, 3, 4]}\n",
+        "gs_cv = GridSearchCV(pipeline, param_grid = params, verbose=1, cv=5)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "F882oqtyNlx-",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 336
+        },
+        "outputId": "6af5ec95-4c47-40e8-a605-5cf4be884235"
+      },
+      "source": [
+        "# Aplicamos GridSearch nos dados de treino\n",
+        "\n",
+        "gs_cv.fit(X_train, y_train)"
+      ],
+      "execution_count": 106,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Fitting 5 folds for each of 4 candidates, totalling 20 fits\n"
+          ],
+          "name": "stdout"
+        },
+        {
+          "output_type": "stream",
+          "text": [
+            "[Parallel(n_jobs=1)]: Using backend SequentialBackend with 1 concurrent workers.\n",
+            "[Parallel(n_jobs=1)]: Done  20 out of  20 | elapsed:    6.9s finished\n"
+          ],
+          "name": "stderr"
+        },
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "GridSearchCV(cv=5, error_score=nan,\n",
+              "             estimator=Pipeline(memory=None,\n",
+              "                                steps=[('Poly',\n",
+              "                                        PolynomialFeatures(degree=2,\n",
+              "                                                           include_bias=True,\n",
+              "                                                           interaction_only=False,\n",
+              "                                                           order='C')),\n",
+              "                                       ('LinearRegression',\n",
+              "                                        LinearRegression(copy_X=True,\n",
+              "                                                         fit_intercept=True,\n",
+              "                                                         n_jobs=None,\n",
+              "                                                         normalize=False))],\n",
+              "                                verbose=False),\n",
+              "             iid='deprecated', n_jobs=None,\n",
+              "             param_grid={'Poly__degree': [1, 2, 3, 4]}, pre_dispatch='2*n_jobs',\n",
+              "             refit=True, return_train_score=False, scoring=None, verbose=1)"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 106
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "Vn5eRUlINqq7",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "4392ca8c-9f34-46ad-f23e-efa80b9aa0ba"
+      },
+      "source": [
+        "# Verificamos o melhor parametro encontrado, como esperado uma grandeza maior que 1\n",
+        "\n",
+        "gs_cv.best_params_"
+      ],
+      "execution_count": 107,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "{'Poly__degree': 3}"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 107
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "VDxVvqo5P4Op",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "052d9d53-0c96-4d65-f36a-c46e8a3dcedc"
+      },
+      "source": [
+        "# Qual melhor score obtido em treino\n",
+        "\n",
+        "gs_cv.best_score_"
+      ],
+      "execution_count": 108,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "0.9185205443440221"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 108
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "luxtO7l5SUSr",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 151
+        },
+        "outputId": "9020a0f7-78d3-4e78-c32f-44fd35152495"
+      },
+      "source": [
+        "# Para verificar o estimador\n",
+        "\n",
+        "gs_cv.best_estimator_"
+      ],
+      "execution_count": 109,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "Pipeline(memory=None,\n",
+              "         steps=[('Poly',\n",
+              "                 PolynomialFeatures(degree=3, include_bias=True,\n",
+              "                                    interaction_only=False, order='C')),\n",
+              "                ('LinearRegression',\n",
+              "                 LinearRegression(copy_X=True, fit_intercept=True, n_jobs=None,\n",
+              "                                  normalize=False))],\n",
+              "         verbose=False)"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 109
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "dHnY0XaeP6he",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "# Podemos aplicar na mão os polynomials features\n",
+        "\n",
+        "poly = PolynomialFeatures(degree=3)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "T9t0qUGPQFue",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "# Aplicar sobre X_train e X_test essas features polinomiais\n",
+        "\n",
+        "X_train_tran = poly.fit_transform(X_train)\n",
+        "X_test_tran = poly.fit_transform(X_test)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "ZjvbTtYjQJqh",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "f1d7b813-8f1d-447a-bb43-1c4c8f750b8d"
+      },
+      "source": [
+        "# Verificamos nosso resultado de Regressão Linear Multipla com SkLearn\n",
+        "\n",
+        "linreg = LinearRegression()\n",
+        "linreg.fit(X_train_tran, y_train)\n",
+        "\n",
+        "linreg.score(X_train_tran, y_train), linreg.score(X_test_tran, y_test)"
+      ],
+      "execution_count": 112,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "(0.9260135498135377, 0.9184541728372874)"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 112
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "Al-5NIonQiwi",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "98d61ce2-8031-4473-b671-dd09facd3559"
+      },
+      "source": [
+        "# Podemos testar também com RandomForestRegressor\n",
+        "\n",
+        "from sklearn.ensemble import RandomForestRegressor\n",
+        "\n",
+        "rfr = RandomForestRegressor()\n",
+        "\n",
+        "rfr.fit(X_train, y_train)\n",
+        "\n",
+        "rfr.score(X_train, y_train)"
+      ],
+      "execution_count": 116,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "0.9884225612567528"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 116
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "UysaCObiTKCr",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "5e25ccfa-4c06-462f-b734-2b5401cc8655"
+      },
+      "source": [
+        "# Podemos perceber que houve overfitting devido a acurácia alta em treino porém mais baixa em teste\n",
+        "\n",
+        "rfr.score(X_test, y_test)"
+      ],
+      "execution_count": 117,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "0.9168892832073947"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 117
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "XTiSWns5Tzfq",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 252
+        },
+        "outputId": "d90635b8-d2e7-470e-bf67-e4f479493f5a"
+      },
+      "source": [
+        "# Podemos testar também utilizando uma rede neural simples linear\n",
+        "\n",
+        "import tensorflow as tf\n",
+        "\n",
+        "model = tf.keras.Sequential()\n",
+        "model.add(tf.keras.layers.Dense(100, input_shape=(10,)))\n",
+        "model.add(tf.keras.layers.Dense(100, 'relu'))\n",
+        "model.add(tf.keras.layers.Dense(1, 'linear'))\n",
+        "\n",
+        "model.summary()"
+      ],
+      "execution_count": 141,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Model: \"sequential_7\"\n",
+            "_________________________________________________________________\n",
+            "Layer (type)                 Output Shape              Param #   \n",
+            "=================================================================\n",
+            "dense_15 (Dense)             (None, 100)               1100      \n",
+            "_________________________________________________________________\n",
+            "dense_16 (Dense)             (None, 100)               10100     \n",
+            "_________________________________________________________________\n",
+            "dense_17 (Dense)             (None, 1)                 101       \n",
+            "=================================================================\n",
+            "Total params: 11,301\n",
+            "Trainable params: 11,301\n",
+            "Non-trainable params: 0\n",
+            "_________________________________________________________________\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "pSRMQxgoUXJT",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "model.compile(optimizer='adam', loss='mean_squared_error')"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "8KO2YY0jVDcu",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 1000
+        },
+        "outputId": "ebaf8f9d-5e9c-4e88-baef-dccf541d0f09"
+      },
+      "source": [
+        "epochs_hist = model.fit(X_train, y_train, epochs=50)"
+      ],
+      "execution_count": 144,
+      "outputs": [
+        {
+          "output_type": "stream",
+          "text": [
+            "Epoch 1/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4397.2012\n",
+            "Epoch 2/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4356.5000\n",
+            "Epoch 3/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4336.4541\n",
+            "Epoch 4/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4305.5474\n",
+            "Epoch 5/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4282.1084\n",
+            "Epoch 6/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4263.6421\n",
+            "Epoch 7/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4212.8477\n",
+            "Epoch 8/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4221.1978\n",
+            "Epoch 9/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4194.1001\n",
+            "Epoch 10/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4182.9517\n",
+            "Epoch 11/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4175.8857\n",
+            "Epoch 12/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4166.5620\n",
+            "Epoch 13/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4150.5884\n",
+            "Epoch 14/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4145.5850\n",
+            "Epoch 15/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4132.8809\n",
+            "Epoch 16/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4128.4819\n",
+            "Epoch 17/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4121.5747\n",
+            "Epoch 18/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4125.5000\n",
+            "Epoch 19/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4111.1094\n",
+            "Epoch 20/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4112.3682\n",
+            "Epoch 21/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4103.1050\n",
+            "Epoch 22/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4101.8198\n",
+            "Epoch 23/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4092.9692\n",
+            "Epoch 24/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4087.4041\n",
+            "Epoch 25/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4089.8042\n",
+            "Epoch 26/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4099.3188\n",
+            "Epoch 27/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4087.6829\n",
+            "Epoch 28/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4085.7764\n",
+            "Epoch 29/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4084.6934\n",
+            "Epoch 30/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4101.4326\n",
+            "Epoch 31/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4089.4421\n",
+            "Epoch 32/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4075.4614\n",
+            "Epoch 33/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4079.6609\n",
+            "Epoch 34/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4062.7651\n",
+            "Epoch 35/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4066.7227\n",
+            "Epoch 36/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4089.4341\n",
+            "Epoch 37/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4091.7993\n",
+            "Epoch 38/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4056.7937\n",
+            "Epoch 39/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4061.9087\n",
+            "Epoch 40/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4074.3464\n",
+            "Epoch 41/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4085.1917\n",
+            "Epoch 42/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4055.7532\n",
+            "Epoch 43/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4051.3503\n",
+            "Epoch 44/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4064.1848\n",
+            "Epoch 45/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4063.9214\n",
+            "Epoch 46/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4042.1592\n",
+            "Epoch 47/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4072.5015\n",
+            "Epoch 48/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4066.7251\n",
+            "Epoch 49/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4052.6462\n",
+            "Epoch 50/50\n",
+            "301/301 [==============================] - 1s 2ms/step - loss: 4067.9541\n"
+          ],
+          "name": "stdout"
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "rWUBIDdQVG41",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "ypred = model.predict(X_train)\n",
+        "ypred2 = model.predict(X_test)"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "ZM7EAP4-VQ0a",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "from sklearn.metrics import r2_score"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "BHCec10tVUjO",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "81c622a0-4cd2-459d-d94f-48baaa49f692"
+      },
+      "source": [
+        "r2_score(y_train, ypred)"
+      ],
+      "execution_count": 148,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "0.923032408636567"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 148
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "FvMUOEiRVazx",
+        "colab_type": "code",
+        "colab": {
+          "base_uri": "https://localhost:8080/",
+          "height": 34
+        },
+        "outputId": "1660f47f-e41f-4c02-accc-2cc14c51ed4a"
+      },
+      "source": [
+        "r2_score(y_test, ypred2)"
+      ],
+      "execution_count": 150,
+      "outputs": [
+        {
+          "output_type": "execute_result",
+          "data": {
+            "text/plain": [
+              "0.9226709806350749"
+            ]
+          },
+          "metadata": {
+            "tags": []
+          },
+          "execution_count": 150
+        }
+      ]
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "2XpY24avV7G6",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        "# Nosso resultado mais balaneado foi com a Rede Neural, mas o regressor linear também obteve bons resultados.\n",
+        "# Temos muitos pontos a melhorar principalmente utilizando métodos mais apropriados de exploração de dados \n",
+        "# e também achar meios melhores de lidar com os NaN's.\n",
+        "\n"
+      ],
+      "execution_count": 0,
+      "outputs": []
+    },
+    {
+      "cell_type": "code",
+      "metadata": {
+        "id": "Pd2B1KTXYkdR",
+        "colab_type": "code",
+        "colab": {}
+      },
+      "source": [
+        ""
+      ],
+      "execution_count": 0,
+      "outputs": []
+    }
+  ]
+}
